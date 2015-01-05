@@ -117,10 +117,16 @@ func main() {
 	for i := range init {
 		init[i] = make([]bool, 10)
 	}
+
+	// Beacon pattern
+	// TODO(ymotongpoo): Add function to read initial state from text file.
 	init[1][1] = true
 	init[1][2] = true
 	init[2][1] = true
-	init[2][2] = true
+	init[3][4] = true
+	init[4][3] = true
+	init[4][4] = true
+
 	l := NewLife(10, 10, init)
 
 	ticker := time.Tick(Interval)
