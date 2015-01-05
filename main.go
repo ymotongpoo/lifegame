@@ -5,7 +5,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"os/exec"
+	"time"
 )
+
+// Interval is display refresh interval.
+const Interval = time.Second / 10
 
 // Field holds cell data.
 type Field struct {
@@ -98,7 +104,9 @@ func (l *Life) Next() {
 
 // Print display current generation status.
 func (l *Life) Print() {
-	fmt.Print("\x0c") // Form feed
+	cmd := exec.Command("clear") // TODO(ymotongpoo): Work out way to clear terminal on Windows.
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 	fmt.Printf("---------- %vth generation\n", l.gen)
 	l.cur.Print()
 }
@@ -115,7 +123,8 @@ func main() {
 	init[2][2] = true
 	l := NewLife(10, 10, init)
 
-	for i := 0; i < 10; i++ {
+	ticker := time.Tick(Interval)
+	for range ticker {
 		l.Print()
 		l.Next()
 	}
