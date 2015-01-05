@@ -45,17 +45,12 @@ func (f *Field) NextGen(r, c int) bool {
 	alive := 0
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
-			if (i != 0 && j != 0) && f.Alive(r+i, c+j) {
-				fmt.Printf("%v %v\n", r, c)
+			if (i != 0 || j != 0) && f.Alive(r+i, c+j) {
 				alive++
 			}
 		}
 	}
-	state := alive == 3 || alive == 2 && f.Alive(r, c)
-	if state {
-		fmt.Println(r, c, state)
-	}
-	return state
+	return alive == 3 || alive == 2 && f.Alive(r, c)
 }
 
 // Print display one generation status to stdout.
@@ -66,7 +61,7 @@ func (f *Field) Print() {
 			if c {
 				bufr[j] = 'o'
 			} else {
-				bufr[j] = 'x'
+				bufr[j] = ' '
 			}
 		}
 		fmt.Println(string(bufr))
@@ -84,7 +79,7 @@ type Life struct {
 func NewLife(h, w int, init [][]bool) *Life {
 	cur := NewField(h, w)
 	next := NewField(h, w)
-	cur.cs = init
+	cur.cs = init // TODO(ymotongpoo): confirm matrix size.
 	return &Life{cur: cur, next: next, gen: 0}
 }
 
@@ -96,7 +91,8 @@ func (l *Life) Next() {
 			l.next.Set(i, j, l.cur.NextGen(i, j))
 		}
 	}
-	l.cur, l.next = l.next, l.cur
+	l.cur = l.next
+	l.next = NewField(l.cur.w, l.cur.h)
 	l.gen++
 }
 
@@ -119,7 +115,7 @@ func main() {
 	l := NewLife(10, 10, init)
 
 	for i := 0; i < 10; i++ {
-		//l.Print()
+		l.Print()
 		l.Next()
 	}
 }
