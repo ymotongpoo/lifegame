@@ -98,6 +98,7 @@ func (l *Life) Next() {
 
 // Print display current generation status.
 func (l *Life) Print() {
+	fmt.Print("\x0c") // Form feed
 	fmt.Printf("---------- %vth generation\n", l.gen)
 	l.cur.Print()
 }
