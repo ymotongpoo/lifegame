@@ -44,11 +44,16 @@ func (f *Field) NextGen(r, c int) bool {
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
 			if (i != 0 && j != 0) && f.Alive(r+i, c+j) {
+				fmt.Printf("%v %v\n", r, c)
 				alive++
 			}
 		}
 	}
-	return alive == 3 || alive == 2 && f.Alive(r, c)
+	state := alive == 3 || alive == 2 && f.Alive(r, c)
+	if state {
+		fmt.Println(r, c, state)
+	}
+	return state
 }
 
 // Print display one generation status to stdout.
@@ -107,11 +112,12 @@ func main() {
 	}
 	init[1][1] = true
 	init[1][2] = true
-	init[1][3] = true
+	init[2][1] = true
+	init[2][2] = true
 	l := NewLife(10, 10, init)
 
 	for i := 0; i < 10; i++ {
-		l.Print()
+		//l.Print()
 		l.Next()
 	}
 }
