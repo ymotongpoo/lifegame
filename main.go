@@ -3,8 +3,13 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"time"
@@ -72,7 +77,6 @@ func (f *Field) Print() {
 		}
 		fmt.Println(string(bufr))
 	}
-
 }
 
 // Life holds current and next generation field.
@@ -87,6 +91,53 @@ func NewLife(h, w int, init [][]bool) *Life {
 	next := NewField(h, w)
 	cur.cs = init // TODO(ymotongpoo): confirm matrix size.
 	return &Life{cur: cur, next: next, gen: 0}
+}
+
+// NewLifeFromFile create new lifegame buffer from text file.
+func NewLifeFromFile(path string) (*Life, error) {
+	var err error
+	buf, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	reader := bufio.NewReader(bytes.NewReader(buf))
+
+	// first line
+	line, err := reader.ReadBytes('\n')
+	if err != nil {
+		return nil, err
+	}
+	colsize := len(line)
+	firstRow := bytesToBool(line)
+
+	init := [][]bool{}
+	init = append(init, firstRow)
+	for {
+		line, err := reader.ReadBytes('\n')
+		if err != nil {
+			break
+		}
+		if len(line) != colsize {
+			return nil, errors.New("column size is not appropriate")
+		}
+		init = append(init, bytesToBool(line))
+	}
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+	return NewLife(len(init), colsize, init), nil
+}
+
+func bytesToBool(line []byte) []bool {
+	b := make([]bool, len(line))
+	for i, c := range line {
+		if c == 'o' {
+			b[i] = true
+		} else {
+			b[i] = false
+		}
+	}
+	return b
 }
 
 // Next calculates each state of all cells in current field and set it in next.
@@ -113,21 +164,11 @@ func (l *Life) Print() {
 
 func main() {
 	fmt.Println("Lifegame")
-	init := make([][]bool, 10)
-	for i := range init {
-		init[i] = make([]bool, 10)
+
+	l, err := NewLifeFromFile("init.txt")
+	if err != nil {
+		log.Fatalf("NewLifeFromFile: %v", err)
 	}
-
-	// Beacon pattern
-	// TODO(ymotongpoo): Add function to read initial state from text file.
-	init[1][1] = true
-	init[1][2] = true
-	init[2][1] = true
-	init[3][4] = true
-	init[4][3] = true
-	init[4][4] = true
-
-	l := NewLife(10, 10, init)
 
 	ticker := time.Tick(Interval)
 	for range ticker {
