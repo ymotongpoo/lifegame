@@ -86,11 +86,14 @@ type Life struct {
 }
 
 // NewLife create new lifegame buffer.
-func NewLife(h, w int, init [][]bool) *Life {
+func NewLife(h, w int, init [][]bool) (*Life, error) {
 	cur := NewField(h, w)
 	next := NewField(h, w)
-	cur.cs = init // TODO(ymotongpoo): confirm matrix size.
-	return &Life{cur: cur, next: next, gen: 0}
+	if len(init) != h || len(init[0]) != w {
+		return nil, errors.New("Wrong init size")
+	}
+	cur.cs = init
+	return &Life{cur: cur, next: next, gen: 0}, nil
 }
 
 // NewLifeFromFile create new lifegame buffer from text file.
@@ -125,7 +128,11 @@ func NewLifeFromFile(path string) (*Life, error) {
 	if err != nil && err != io.EOF {
 		return nil, err
 	}
-	return NewLife(len(init), colsize, init), nil
+	l, err := NewLife(len(init), colsize, init)
+	if err != nil {
+		return nil, err
+	}
+	return l, nil
 }
 
 func bytesToBool(line []byte) []bool {
